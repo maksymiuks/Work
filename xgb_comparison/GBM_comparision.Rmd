@@ -21,11 +21,11 @@ y <- y$survived
 
 # Introduction
 
-Machine learning is changing very fast. During those years of constant development many algorithms were implemented in multiple programming languges. Since thsose implementations were made by different people, it was impossible to keep them identical. That is the reason why we may be worried about performance of our models acorss various programming languages. That is the reason why we are going to learn three gbm models, `gbm` R package, `h2o` implementation of gbm, and `scikit-learn` gbm in Python. Afterwards we are going to explain those models using `DALEX` library to inspect if they differ much. 
+Machine learning is changing very fast. During those years of constant development many algorithms were implemented in multiple programming languges. Since those implementations were made by different people, it was impossible to keep them identical. That is the reason why we may be worried about performance of our models acorss various programming languages. That is the reason why we are going to learn three gbm models, `gbm` R package, `h2o` implementation of gbm, and `scikit-learn` gbm in Python. Afterwards we are going to explain those models using `DALEX` library to inspect if they differ much. 
 
 # Data
 
-We are going to use preprocessed data from `titanic` dataseta avaiable in `DALEX` package. We split dataset into `titanic_test` and `titanic_train` that lack country column, in comparision to original `titanic`, all factor columns were one-hot-encoded and `survived` column was chcnged from two level factor `yes`, `no` to `0` and `1` numerci vector. In this vignette We want to classify if specified passager has survived Titanic's maiden voyage.
+We are going to use preprocessed data from `titanic` dataseta avaiable in `DALEX` package. We split dataset into `titanic_test` and `titanic_train`. Data frames lack country column, in comparision to original `titanic`, all factor columns were one-hot-encoded and `survived` column was changed from two level factor `yes`, `no` to `0` and `1` numeric vector. In this vignette We want to classify if specified passager has survived Titanic's maiden voyage.
 
 
 ```{r}
@@ -39,7 +39,7 @@ kable(titanic_train_X %>% head(), "html") %>% kable_styling("striped") %>%
 
 ## R gbm
 
-First, we would like o introduce R implementation of `gbm` which we will acces thorugh `mlr` package. Specifying most of parameters helps us fiting almost exactly same models accros langugaes, at least in theory.
+First, we would like to introduce R implementation of `gbm` which we will acces thorugh `mlr` package as a wrapper. Specifying most of parameters helps us fiting similiar models accros langugaes, at least in theory.
 
 ```{r message=FALSE, warning=FALSE}
 set.seed(123, "L'Ecuyer")
@@ -61,7 +61,7 @@ performance(predict(model_r, newdata = cbind(titanic_test_X, titanic_test_Y)),
 
 ```
 
-As we can see R implementation of `gbm` was quite sucessfull. AUC measure above 80% shows high quality of our model, especially taking into account that our model is natural.
+As we can see R implementation of `gbm` was quite sucessfull. AUC measure above 80% shows high quality of our model, especially taking into account that dataset isn't so big.
 
 ## h2o gbm
 
@@ -96,7 +96,7 @@ h2o.auc(h2o.performance(model_h2o, newdata = titanic_test_h2o))
 
 ## scikit-learn gbm
 
-Inspection of models that have been created at Python using R is not as hard as it may seem to. It is possbile thanks to two packages. `reticulate` avaiable at R and `pickle` from Python.
+Inspection of models that have been created at Python via R is not as hard as it may seem to. It is possbile thanks to two packages. `reticulate` avaiable at R and `pickle` from Python.
 
 ```{r}
 library(reticulate)
@@ -157,7 +157,7 @@ With explainers ready, we can compare our models in order to find possible diffe
 ```{r}
 plot(model_performance(r_explain), model_performance(h2o_explain), model_performance(py_explain))
 ```
-As we can see, models are quite similiar. The biggest difference is residuals distrubution in [0, 0.13] compartment where R `gbm` has more observation. R is worse in compartment [0.13, 0.25] aswell, but diffence is not as easy to spot as in previous area. 
+As we can see, models are quite similiar. The biggest difference is residuals distrubution in [0, 0.13] compartment where R `gbm` has biggest mistakes. R is worse in compartment [0.13, 0.25] aswell, but diffence is not as easy to spot as in previous area. 
 
 ## Variable importance
 
@@ -176,3 +176,7 @@ pdp_py <- variable_response(py_explain, variable = "fare", type = "pdp")
 plot(pdp_r, pdp_h2o, pdp_py)
 
 ```
+
+We can see the difference in how our model behaves for different values of `fare`. Response is similiar only in [0,50] compartment.
+
+
